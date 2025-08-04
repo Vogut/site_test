@@ -1,0 +1,13 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+body {
+    padding-top: 56px;  /* 如果你用了 fixed-top，通常56px正好 */
+}
+ul{
+    list-style-type: none;
+}
+ul.navbar-right {
+    margin-right: 0; 
+}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {{ page_title }}
+{% endblock %}
+
+{% block nav_home_active %}active{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-4 mx-auto">
+            {% if user.is_authenticated %}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ form_title }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <form action="" method="POST">
+                            {% csrf_token %}
+                            {% for field in form %}
+                                {% if not field.is_hidden %}
+                                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {% endif %}
+                                {{ field }}
+                                <p class="text-danger">{{ field.errors.as_text }}</p>
+                            {% endfor %}
+                            <span class="text-danger">{{ form.non_field_errors }}</span>
+                            <div class="clear_fix"></div>
+                            {% block button_extends %}
+      
+                            {% endblock%}
+                            <div class="float-right">
+                                <button type="submit" class="btn btn-primary">{{ submit_text }}</button>
+                                <button class="btn btn-outline-secondary" onclick="window.location.href='{{ return_url }}'">返回</button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <span>未登录，跳转到首页...</span>
+                <script type="text/javascript">
+                    window.location.href = '/';
+                </script>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

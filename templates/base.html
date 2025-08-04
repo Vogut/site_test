@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title%}{% endblock%}</title>
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap-4.6.2/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap-4.6.2/bootstrap-icons-1.13.1/bootstrap-icons.css' %}">
+    <script src="{% static 'jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'bootstrap-4.6.2/js/bootstrap.bundle.min.js' %}"></script>
+    {% block header_extends %}{% endblock %}
+</head>
+
+<body>
+    <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{% url 'home' %}">个人博客网站</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item {% if request.path == '/' %}active{% endif %}">
+                    <a href="{% url 'home' %}" class="nav-link">首页</a>
+                </li>
+                <li class="nav-item {% if request.path == '/blog/' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'blog_list' %}">博客</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                {% if not user.is_authenticated %}
+                    <li class="nav-item {% if request.path == '/user/login/' %}active{% endif %}"><a class="nav-link" href="{% url 'login' %}?from={{ request.get_full_path }}">登录</a></li>
+                    <li class="nav-item {% if request.path == '/user/register/' %}active{% endif %}"><a class="nav-link" href="{% url 'register' %}?from={{ request.get_full_path }}">注册</a></li>
+                {% else %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                            {{user.username}}({{user.get_nickname_or_username}})
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="{% url 'user_info' %}">个人资料</a>
+                            {% if user.is_staff or user.is_superuser %}
+                                <a class="dropdown-item" href="{% url 'admin:index' %}">后台管理</a>
+                            {% endif %}
+                            <a class="dropdown-item" href="{% url 'change_password' %}">修改密码</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% url 'logout' %}?from={{ request.get_full_path }}">登出</a>
+                        </div>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <hr>
+    {% block content %}
+      
+    {% endblock content %}
+    <!-- Modal -->
+    <div class="modal fade" id="login_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="login_modal_form" action="" method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">登录</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        
+                        {% csrf_token %}
+                        {% for field in login_modal_form %}
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                        {% endfor %}
+                        <span id="login_modal_tip" class="text-danger"></span>
+                        
+                        
+                    </div>
+
+                    <div class="modal-footer">
+                        <a href="{% url 'register' %}?from={{ request.get_full_path }}" class="mr-auto" >没有账户？点此注册</a>
+                        <button type="submit" class="btn btn-primary">登录</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>                            
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% block script_extends %}
+      
+    {% endblock%}
+    <script type="text/javascript">
+        $('#login_modal_form').submit(function(){
+            event.preventDefault();
+            $.ajax({
+                url: "{% url 'login_for_modal' %}",
+                type: 'POST',
+                data: $(this).serialize(),
+                cache: false,
+                success:function(data){
+                    if(data['status'] == 'SUCCESS'){
+                        window.location.reload();
+                    }else{
+                        $('#login_modal_tip').text('用户名或密码错误')
+                    }
+                }
+            })
+        })
+    </script>
+
+</body>
+</html>
